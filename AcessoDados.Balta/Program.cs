@@ -11,7 +11,7 @@ namespace AcessoDados.Balta
     {
         static void Main(string[] args)
         {
-            const string connectionString = "Server=localhost,1433;Database=balta;User ID=sa;Password=1q2w3e4r@#$";
+            const string connectionString = "Server=localhost,1433;Database=balta;User ID=sa;Password=1q2w3e4r@#$;Encrypt=false";
             //Microsoft.Data.SqlClient == pacote para se conectar ao Banco de dados
             
             using(var connection = new SqlConnection(connectionString))
@@ -32,6 +32,7 @@ namespace AcessoDados.Balta
                 }
             }
 
+            Console.ReadKey();
         }
     }
 }
