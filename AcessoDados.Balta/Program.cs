@@ -20,20 +20,23 @@ namespace AcessoDados.Balta
 
             using (var connection = new SqlConnection(connectionString))
             {
-                UpdateCategory(connection);
-                ListCategories(connection);
+                //UpdateCategory(connection);
+                //DeleteCategories(connection);
+                //CreateManyCategories(connection);
+                GetCategories(connection);
                 //CreateCategories(connection);
             }
 
             Console.ReadKey();
         }
 
-        static void ListCategories(SqlConnection connection)
+        static void GetCategories(SqlConnection connection)
         {
             //Consulta com Dapper
             var categories = connection.Query<Category>("SELECT [Id], [Title] FROM [Category]");
 
-            foreach (var item in categories)
+            //Ordernando por Titulos em ordem alfabética
+            foreach (var item in categories.OrderBy(x => x.Title))
             {
                 Console.WriteLine($"{item.Id} - {item.Title}");
             }
@@ -56,7 +59,7 @@ namespace AcessoDados.Balta
               PARA EVITAR SQLINJECTION*/
             var insertSql = @"INSERT INTO [Category] 
                 VALUES(@Id, @Title, @Url, @Summary, @Order, @Description, @Featured)";
-           
+
             //Inserção com Dapper Parte 2
             var rows = connection.Execute(insertSql, new
             {
@@ -82,6 +85,73 @@ namespace AcessoDados.Balta
             });
 
             Console.WriteLine($"{rows} registros atualizados");
+        }
+
+        //Deleção de Registro com Dapper
+        static void DeleteCategories(SqlConnection connection)
+        {
+            var deleteQuery = "DELETE [Category] WHERE [Id]=@Id";
+
+            var rows = connection.Execute(deleteQuery, new
+            {
+                Id = new Guid("f1c0ea41-6d2d-4d69-a794-fa6a836da884")
+            });
+
+            Console.WriteLine($"{rows} registros deletados");
+        }
+
+        static void CreateManyCategories(SqlConnection connection)
+        {
+
+            //Inserção com Multipla Dapper Parte 1 
+            var category = new Category();
+            category.Id = Guid.NewGuid();
+            category.Title = "Amazon AWS";
+            category.Url = "amazon";
+            category.Summary = "AWS Cloud";
+            category.Order = 8;
+            category.Description = "Categoria destinada a serviços do AWS";
+            category.Featured = false;
+
+            var category2 = new Category();
+            category2.Id = Guid.NewGuid();
+            category2.Title = "Categoria Nova";
+            category2.Url = "categoria-nova";
+            category2.Summary = "CTG Cloud";
+            category2.Order = 9;
+            category2.Description = "Categoria destinada a serviços do CTG";
+            category2.Featured = true;
+
+            /*NÃO DEVEMOS CONCATENAR STRING ""$ + {0}"" EM INSERT UPDATE, SELECT...
+              PARA EVITAR SQLINJECTION*/
+            var insertSql = @"INSERT INTO [Category] 
+                VALUES(@Id, @Title, @Url, @Summary, @Order, @Description, @Featured)";
+
+            //Inserção com Dapper Parte 2
+            var rows = connection.Execute(insertSql, new[]
+            {
+                new
+                {
+                    category.Id,
+                    category.Title,
+                    category.Url,
+                    category.Summary,
+                    category.Order,
+                    category.Description,
+                    category.Featured
+                },
+                new
+                {
+                    category2.Id,
+                    category2.Title,
+                    category2.Url,
+                    category2.Summary,
+                    category2.Order,
+                    category2.Description,
+                    category2.Featured
+                }
+            });
+            Console.WriteLine($"{rows} linhas inseridas");
         }
     }
 }
