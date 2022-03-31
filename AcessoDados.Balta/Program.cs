@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,15 +25,17 @@ namespace AcessoDados.Balta
                 //DeleteCategories(connection);
                 //CreateManyCategories(connection);
                 GetCategories(connection);
+                //GetStudent(connection);
+                //ExecuteProcedure(connection);
                 //CreateCategories(connection);
             }
 
             Console.ReadKey();
         }
 
+        //Consulta com Dapper
         static void GetCategories(SqlConnection connection)
         {
-            //Consulta com Dapper
             var categories = connection.Query<Category>("SELECT [Id], [Title] FROM [Category]");
 
             //Ordernando por Titulos em ordem alfabética
@@ -42,6 +45,17 @@ namespace AcessoDados.Balta
             }
         }
 
+        static void GetStudent(SqlConnection connection)
+        {
+            var estudantes = connection.Query("SELECT [Id], [Name] FROM [Student]");
+
+            foreach (var item in estudantes)
+            {
+                Console.WriteLine($"{item.Id} - {item.Name}");
+            }
+        }
+
+        //Inserção com Dapper
         static void CreateCategories(SqlConnection connection)
         {
 
@@ -100,6 +114,7 @@ namespace AcessoDados.Balta
             Console.WriteLine($"{rows} registros deletados");
         }
 
+        //Inserção com Multipla Dapper
         static void CreateManyCategories(SqlConnection connection)
         {
 
@@ -152,6 +167,21 @@ namespace AcessoDados.Balta
                 }
             });
             Console.WriteLine($"{rows} linhas inseridas");
+        }
+
+        //Procedure de Deleção Dapper
+        static void ExecuteProcedure(SqlConnection connection)
+        {
+            
+            //[sqDeleteStudent] é nome da procedure no caso 
+            var procedure = "[spDeleteStudent]";
+
+            var parametros = new { StudentId = "a77bb753-3d93-4919-839e-0fd97b8919e0" };
+            //Comando é igual a executar uma Query a unica diferença é que passamos um commandType
+            //precisa importar System.Data
+            var rows = connection.Execute(procedure, parametros, commandType: CommandType.StoredProcedure);
+            
+            Console.WriteLine($"{rows}Linhas Afetadas");
         }
     }
 }
