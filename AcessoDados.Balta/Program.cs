@@ -24,7 +24,8 @@ namespace AcessoDados.Balta
                 //UpdateCategory(connection);
                 //DeleteCategories(connection);
                 //CreateManyCategories(connection);
-                GetCategories(connection);
+                //GetCategories(connection);
+                ExecuteReadProcedure(connection);
                 //GetStudent(connection);
                 //ExecuteProcedure(connection);
                 //CreateCategories(connection);
@@ -182,6 +183,23 @@ namespace AcessoDados.Balta
             var rows = connection.Execute(procedure, parametros, commandType: CommandType.StoredProcedure);
             
             Console.WriteLine($"{rows}Linhas Afetadas");
+        }
+
+        //Procedure de Leitura Dapper
+        static void ExecuteReadProcedure(SqlConnection connection)
+        {
+            var procedure = "[spGetCoursesByCategory]";
+            var param = new { CategoryId = "09ce0b7b-cfca-497b-92c0-3290ad9d5142" };
+            var result = connection.Query(
+                procedure,
+                param,
+                commandType: CommandType.StoredProcedure);
+
+            foreach (var item in result)
+            {
+                //Detalhe o nome da propriedade no caso o id tem que ser exatamente como esta no Banco
+                Console.WriteLine($"{item.Id} - {item.Title}");
+            }
         }
     }
 }
