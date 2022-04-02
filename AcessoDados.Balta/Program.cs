@@ -24,8 +24,10 @@ namespace AcessoDados.Balta
                 //UpdateCategory(connection);
                 //DeleteCategories(connection);
                 //CreateManyCategories(connection);
+                //ExecuteReadProcedure(connection);
+                //ExecuteScalar(connection);
+                ReadView(connection);
                 //GetCategories(connection);
-                ExecuteReadProcedure(connection);
                 //GetStudent(connection);
                 //ExecuteProcedure(connection);
                 //CreateCategories(connection);
@@ -115,7 +117,7 @@ namespace AcessoDados.Balta
             Console.WriteLine($"{rows} registros deletados");
         }
 
-        //Inserção com Multipla Dapper
+        //Inserção Multipla com Dapper
         static void CreateManyCategories(SqlConnection connection)
         {
 
@@ -198,6 +200,52 @@ namespace AcessoDados.Balta
             foreach (var item in result)
             {
                 //Detalhe o nome da propriedade no caso o id tem que ser exatamente como esta no Banco
+                Console.WriteLine($"{item.Id} - {item.Title}");
+            }
+        }
+
+        //ExecuteScalar *É muito utilizado quando quero inserir um registro e saber o Id desse item que foi criado
+        static void ExecuteScalar(SqlConnection connection)
+        {
+            //Inserção com Dapper
+            //Não to gerando o Id da Categoria
+            var category = new Category();
+            category.Title = "Teste Amazon AWS";
+            category.Url = "amazon";
+            category.Summary = "AWS Cloud";
+            category.Order = 8;
+            category.Description = "Categoria destinada a serviços do AWS";
+            category.Featured = false;
+
+            /*NÃO DEVEMOS CONCATENAR STRING ""$ + {0}"" EM INSERT UPDATE, SELECT...
+              PARA EVITAR SQLINJECTION*/
+            //MUDANÇA "@Id" = "NEWID()" E Também adicionar o OUTPUT 
+            var insertSql = @"INSERT INTO [Category] OUTPUT inserted.[Id]
+                VALUES(NEWID(), @Title, @Url, @Summary, @Order, @Description, @Featured)";
+
+            //Saber o id que foi gerado
+            var id = connection.ExecuteScalar<Guid>(insertSql, new
+            {
+                category.Title,
+                category.Url,
+                category.Summary,
+                category.Order,
+                category.Description,
+                category.Featured
+            });
+
+            Console.WriteLine($"A categoria inserida foi: {id}");
+        }
+
+        //View de Leitura
+        static void ReadView(SqlConnection connection)
+        {
+            //[vwCourses] é o nome da View que esta no Banco
+            var sql = "SELECT * FROM [vwCourses]";
+            var courses = connection.Query(sql);
+
+            foreach (var item in courses)
+            {
                 Console.WriteLine($"{item.Id} - {item.Title}");
             }
         }
