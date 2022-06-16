@@ -26,11 +26,12 @@ namespace AcessoDados.Balta
                 //CreateManyCategories(connection);
                 //ExecuteReadProcedure(connection);
                 //ExecuteScalar(connection);
-                ReadView(connection);
+                //ReadView(connection);
                 //GetCategories(connection);
                 //GetStudent(connection);
                 //ExecuteProcedure(connection);
                 //CreateCategories(connection);
+                OneToOne(connection);
             }
 
             Console.ReadKey();
@@ -175,7 +176,7 @@ namespace AcessoDados.Balta
         //Procedure de Deleção Dapper
         static void ExecuteProcedure(SqlConnection connection)
         {
-            
+
             //[sqDeleteStudent] é nome da procedure no caso 
             var procedure = "[spDeleteStudent]";
 
@@ -183,7 +184,7 @@ namespace AcessoDados.Balta
             //Comando é igual a executar uma Query a unica diferença é que passamos um commandType
             //precisa importar System.Data
             var rows = connection.Execute(procedure, parametros, commandType: CommandType.StoredProcedure);
-            
+
             Console.WriteLine($"{rows}Linhas Afetadas");
         }
 
@@ -247,6 +248,29 @@ namespace AcessoDados.Balta
             foreach (var item in courses)
             {
                 Console.WriteLine($"{item.Id} - {item.Title}");
+            }
+        }
+
+        static void OneToOne(SqlConnection connection)
+        {
+            var sql = @"
+                    SELECT 
+                        * 
+                    FROM 
+                        [CareerItem] 
+                    INNER JOIN 
+                        [Course] ON [CareerItem].[CourseId] = [Course].[Id]";
+
+            var items = connection.Query<CareerItem, Course, CareerItem>(
+                sql,
+                (careerItem, course) => {
+                    careerItem.Course = course;
+                    return careerItem;
+                }, splitOn: "Id");
+
+            foreach (var item in items)
+            {
+                Console.WriteLine($"{item.Title} - Curso: " + item.Course.Title);
             }
         }
     }
