@@ -176,6 +176,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Career.cs" />
     <Compile Include="Models\CareerItem.cs" />
     <Compile Include="Models\Category.cs" />
     <Compile Include="Models\Course.cs" />
