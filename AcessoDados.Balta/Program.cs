@@ -33,7 +33,10 @@ namespace AcessoDados.Balta
                 //CreateCategories(connection);
                 //OneToOne(connection);
                 //OneToMany(connection);
-                QueryMultiple(connection);
+                //QueryMultiple(connection);
+                //SelectIn(connection);
+                //Like(connection);
+                Transactions(connection);
             }
 
             Console.ReadKey();
@@ -342,6 +345,88 @@ namespace AcessoDados.Balta
                 {
                     Console.WriteLine(item.Title);
                 }
+            }
+        }
+
+        //Uma forma de filtrar usando In 
+        static void SelectIn(SqlConnection connection)
+        {
+            var query = @"SELECT * FROM [Career] WHERE [Id] IN @Id";
+
+            var items = connection.Query<Career>(query, new
+            {
+                Id = new[]
+                {
+                    "e6730d1c-6870-4df3-ae68-438624e04c72",
+                    "4327ac7e-963b-4893-9f31-9a3b28a4e72b"
+                }
+            });
+
+            foreach (var item in items)
+            {
+                Console.WriteLine($"{item.Title}");
+            }
+        }
+
+        //Consulta utilizando o LIKE
+        static void Like(SqlConnection connection)
+        {
+            var termo = "backend";
+            var query = @"SELECT * FROM [Course] WHERE [Title] LIKE @exp";
+
+            var items = connection.Query<Course>(query, new
+            {
+                //é o parametro utilizado, no caso cursos que contem backend
+                exp = $"%{termo}%"
+            });
+
+            foreach (var item in items)
+            {
+                Console.WriteLine($"{item.Title}");
+            }
+        }
+
+        //Utilizando o Rollback
+        static void Transactions(SqlConnection connection)
+        {
+            var category = new Category();
+            category.Id = Guid.NewGuid();
+            category.Title = "Teste";
+            category.Url = "amazon";
+            category.Description = "Categoria destinada a serviços do AWS";
+            category.Order = 8;
+            category.Summary = "AWS Cloud";
+            category.Featured = false;
+
+            var insertSql = @"INSERT INTO 
+                    [Category] 
+                    VALUES(
+                    @Id, 
+                    @Title, 
+                    @Url, 
+                    @Summary, 
+                    @Order, 
+                    @Description, 
+                    @Featured)";
+
+            connection.Open();
+            using (var transaction = connection.BeginTransaction())
+            {
+                var rows = connection.Execute(insertSql, new
+                {
+                    category.Id,
+                    category.Title,
+                    category.Url,
+                    category.Summary,
+                    category.Order,
+                    category.Description,
+                    category.Featured
+                }, transaction);
+
+                //transaction.Commit();
+                transaction.Rollback();
+
+                Console.WriteLine($"{rows} linhas inseridas");
             }
         }
     }
